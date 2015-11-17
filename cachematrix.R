@@ -1,40 +1,35 @@
-## Put comments here that give an overall description of what your
-## functions do
-
-## Write a short comment describing this function
-## This function sets and gets the matrix and inverse values 
-CacheMatrix <- function(x = matrix()) {
-  m <- NULL
-  set <- function(y) {
+## makeMatrix resets the input values that were last used by cacheSolve to calculate a matrix 
+## stores the fuctions used by cacheMatrix to get new and set input values  
+makeCacheMatrix <- function(x = numeric(), ...) {
+  minv <- NULL                                ## sets the matrix inverse value to NULL    
+  set <- function(y) {                        ## resets the cached matrix input values and the inverse value
     x <<- y
-    m <<- NULL
+    a1 <- NULL
+    a2 <<- NULL
+    minv <<- NULL                             
   }
-  get <- function() x
-  setmtx <- function(matrix) m <<- matrix
-  getmtx <- function() m
-  list(set = set, get = get,
-       setmtx = setmtx,
-       getmtx = getmtx) 
+  getx <- function() x
+  setminv <- function(solve) minv <<- solve   ## function to set minv to the inverse result
+  getminv <- function() minv                  ## function to get the set value of minv for evaluation in the cacheMatrix function 
+    list(set = set, getx = getx,              ## creates a list of the funtions to be used in cacheMatrix
+    setminv = setminv,
+    getminv = getminv) 
 }
 
 
-## Write a short comment describing this function
-## This function checks whether the matrix exists
-## If it does, it gets the calculation from cache
-## otherwise it calculates the martix
-## then it inverses (solves) the matrix 
+## cacheSolve checks whether the inverse for the inputed matrix already exists
+## If it does, it returns the cached value and stops
+## otherwise it calls makeMatrix, calculates the matrix inverse, caches the resulting inverse 
 
-cacheSolve <- function(x, ...) {
-        ## Return a matrix that is the inverse of 'x'
-  m <- x$getmtx()
-  if(!is.null(m)) {
-    message("getting cached data")
-    minv <- solve(m)
-    return(minv)
+cacheSolve <- function(x, nrow = 2, ncol = 2) {
+  mCache <- x$getminv()               ## sets the minv variable to the inputs last used to create an inverse matrix
+  if(!is.null(mCache)) {              ## evaluates whether the inverse of the matrix has already been calculated, if so returns the stored value
+    print("getting cached data")
+    return(mCache)
   }
-  data <- x$get()
-  m <- matrix(data, ...)
-  x$setmtx(m)
-  minv <- solve(m)
-  minv
+  a1 <- nrow                       ## if the matrix inverse hasn't been calculated, gets the inputs for creating the new matrix
+  a2 <- ncol  
+  minv <- solve(matrix(x$getx(), nrow = a1, ncol = a2))         ## inverses the matrix
+  x$setminv(minv)                  ## sets the inverse value for the given matrix input 
+  minv                             ## shows the  value of the matrix inversion
 }
